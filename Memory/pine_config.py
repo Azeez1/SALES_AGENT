@@ -1,25 +1,26 @@
-
 # pinecone_config.py
-# This file contains configuration settings and index initialization for Pinecone.
+# This file sets up and connects to your Pinecone index using the updated Pinecone SDK.
 
 import os
-from pinecone import Pinecone
+import pinecone
 
-# Load your Pinecone API keys and environment variables
+# Load your Pinecone API key and environment variables from your environment
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENV = os.getenv("PINECONE_ENV")  # e.g., 'us-west1-gcp'
 INDEX_NAME = "memorytest"
 
-# Initialize Pinecone with your API key
-pc = Pinecone(api_key=PINECONE_API_KEY)
+# Initialize Pinecone using the new configure method
+pinecone.configure(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 
 # Check if the index exists; if not, create it with the specified dimension for OpenAI embeddings
-if INDEX_NAME not in pc.list_indexes().names():
-    pc.create_index(
+if INDEX_NAME not in pinecone.list_indexes():
+    pinecone.create_index(
         name=INDEX_NAME,
         dimension=1536,  # Dimension for OpenAI embeddings
         metric="cosine"
     )
 
 # Connect to the created or existing Pinecone index
-index = pc.Index(INDEX_NAME)
+index = pinecone.Index(INDEX_NAME)
+
+print(f"Connected to Pinecone index: {INDEX_NAME}")
