@@ -8,3 +8,6 @@ httpx>=0.24.1
 pydantic>=2.3.0
 elevenlabs
 pinecone
+google-api-core
+pinecone-client
+tqdm

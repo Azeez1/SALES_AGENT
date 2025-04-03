@@ -18,20 +18,26 @@ def store_conversation_summary(contact_id, summary_text, timestamp, sentiment):
       - timestamp (str or datetime): When the conversation occurred.
       - sentiment (str): Sentiment of the conversation (e.g., positive, negative).
     """
+    # Ensure timestamp is in ISO format if it's a datetime object
+    if isinstance(timestamp, datetime.datetime):
+        timestamp_str = timestamp.isoformat()
+    else:
+        timestamp_str = str(timestamp)
+
     # Generate an embedding from the summary text
     embedding = embedding_model.embed_query(summary_text)
     # Create a unique vector ID using the contact ID and timestamp
-    vector_id = f"{contact_id}-{timestamp}"
-    
+    vector_id = f"{contact_id}-{timestamp_str}"
+
     # Prepare metadata to store along with the vector
     metadata = {
         "contact_id": contact_id,
-        "timestamp": str(timestamp),
+        "timestamp": timestamp_str,
         "sentiment": sentiment
     }
     # Upsert the vector into Pinecone with its metadata
     index.upsert([(vector_id, embedding, metadata)])
-    print(f"Stored memory for {contact_id} at {timestamp}")
+    print(f"Stored memory for {contact_id} at {timestamp_str}")
 
 def retrieve_memories(contact_id, top_k=3):
     """
