@@ -7,7 +7,7 @@ import datetime
 # Updated import based on deprecation warning:
 from langchain_openai import OpenAIEmbeddings
 
-from pine_config import index  # Import the initialized Pinecone index
+from .pine_config import index  # Import the initialized Pinecone index
 
 # Read the OpenAI API key from the environment variable
 openai_api_key = os.getenv("OPENAI_API_KEY")

@@ -11,3 +11,5 @@ pinecone
 google-api-core
 pinecone-client
 tqdm
+langchain
+pinecone-client
