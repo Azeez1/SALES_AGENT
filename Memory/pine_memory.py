@@ -1,12 +1,21 @@
 # pinecone_memory.py
 # This file defines functions to store and retrieve conversation summaries (semantic memory) in Pinecone.
 
-from langchain.embeddings.openai import OpenAIEmbeddings
-from pinecone_config import index  # Import the initialized Pinecone index
+import os
 import datetime
 
-# Initialize the embedding model for converting text to embeddings
-embedding_model = OpenAIEmbeddings()
+# Updated import based on deprecation warning:
+from langchain_openai import OpenAIEmbeddings
+
+from pine_config import index  # Import the initialized Pinecone index
+
+# Read the OpenAI API key from the environment variable
+openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise ValueError("Please set the OPENAI_API_KEY environment variable.")
+
+# Initialize the embedding model with the API key
+embedding_model = OpenAIEmbeddings(openai_api_key=openai_api_key)
 
 def store_conversation_summary(contact_id, summary_text, timestamp, sentiment):
     """
