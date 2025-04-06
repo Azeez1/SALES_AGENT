@@ -66,5 +66,7 @@ def retrieve_memories(contact_id, top_k=3):
         vector=query_vector,
         top_k=top_k,
         include_metadata=True
+
+     
     )
     return results['matches']
