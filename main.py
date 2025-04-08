@@ -2,7 +2,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from Memory.pine_memory import store_conversation_summary, retrieve_memories
-import datetime
+from datetime import datetime
 import os
 import logging
 from fastapi.responses import JSONResponse
@@ -15,27 +15,26 @@ app = FastAPI()
 class StoreMemoryRequest(BaseModel):
     contact_id: str
     summary_text: str
-    timestamp: str  # should be in ISO format (e.g., "2025-04-02T20:00:00")
+    timestamp: datetime  # should be in ISO format (e.g., "2025-04-02T20:00:00")
     sentiment: str
 
 
 #########   STORE FUNCTION ###################
-# @app.post("/store")
-# async def store_memory(data: StoreMemoryRequest):
-#     try:
-#         # Convert timestamp from string to datetime
-#         ts = datetime.datetime.fromisoformat(data.timestamp)
-#         # Call the function to store the conversation summary in Pinecone
-#         store_conversation_summary(
-#             contact_id=data.contact_id,
-#             summary_text=data.summary_text,
-#             timestamp=ts,
-#             sentiment=data.sentiment
-#         )
-#         return {"status": "success", "message": f"Stored memory for {data.contact_id}"}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
-
+@app.post("/store")
+async def store_memory(data: StoreMemoryRequest):
+    try:
+        # Convert timestamp from string to datetime
+        ts =  data.timestamp
+        # Call the function to store the conversation summary in Pinecone
+        store_conversation_summary(
+            contact_id=data.contact_id,
+            summary_text=data.summary_text,
+            timestamp=ts,
+            sentiment=data.sentiment
+        )
+        return {"status": "success", "message": f"Stored memory for {data.contact_id}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 logging.basicConfig(level=logging.INFO)
 
 
@@ -68,36 +67,13 @@ async def get_memory(contact_id: str, top_k: int = 3):
 
 
 
-
-
-
 @app.post("/conversation-initiation")
-async def conversation_initiation(request: Request):
+async def conversation_initiation():
     try:
-        # 🧠 Grab caller ID from custom header
-        caller_id = request.headers.get("x-caller-id")
-
-        if not caller_id:
-            print("⚠️ No caller ID received in header. Returning fallback memory.")
-            return {
-                "client_data": {
-                    "long_term_memory": "No prior memory available for this caller."
-                }
-            }
-
-        print(f"📞 Caller ID from header: {caller_id}")
-
-        # 🔍 Retrieve Pinecone memory
-        memories = retrieve_memories(caller_id)
-
-        # 📝 Format memory for LLM injection
-        if not memories:
-            memory_text = "No past memory found for this caller."
-        else:
-            memory_text = "\n".join([
-                f"{m['metadata']['timestamp']} - {m['metadata']['sentiment']}"
-                for m in memories
-            ])
+        # 🧠 Don't fetch memory here — tell LLM to use the tool
+        memory_text = (
+            "Memory not injected yet. Please call the RETRIEVE_MEMORY tool using system__caller_id before continuing the conversation."
+        )
 
         return {
             "client_data": {
